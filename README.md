@@ -7,6 +7,8 @@ For Plato, **reminiscence** is knowledge that the soul has but which has been fo
 
 **Status**:
 
+[![Remini/rust](https://github.com/Gravitalia/Remini/actions/workflows/ci.yml/badge.svg)](https://github.com/Gravitalia/Remini/actions/workflows/ci.yml)
+
 ## Models
 | Name | Description | With |
 | ---- | ----------- | ---- |
