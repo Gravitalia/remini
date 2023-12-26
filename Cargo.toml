@@ -1,3 +1,8 @@
+[package]
+name = "remini"
+version = "0.1.0"
+edition = "2021"
+
 [profile.release]
 opt-level = 3
 lto = true
@@ -10,8 +15,13 @@ debug = false
 opt-level = 0
 debug = true
 
-[workspace]
-members = [
-    "remini",
-]
-resolver = "2"
+[dependencies]
+tonic = "0.10"
+prost = "0.12"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+fern = "0.6"
+log = "0.4"
+
+[build-dependencies]
+tonic-build = "0.10"
