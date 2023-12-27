@@ -1,5 +1,4 @@
 use anyhow::Result;
-use image::ImageBuffer;
 use tract_onnx::prelude::*;
 
 const IMAGE_WIDTH: u32 = 224;
@@ -31,24 +30,8 @@ impl CorpusManager for Corpus {
     /// Predicts the possible label of the input image.
     fn predict(&self, buffer: &[u8]) -> Result<String> {
         let img = image::load_from_memory(buffer)?;
-        /*let resized = ImageBuffer::from_vec(
-            IMAGE_WIDTH,
-            IMAGE_HEIGHT,
-            image_processor::resizer::resize(buffer, Some(IMAGE_WIDTH), Some(IMAGE_HEIGHT))?.into_inner()?,
-        )
-        .unwrap_or_default();*/
 
-        // Todo: no resize if good dimensions are.
-        /*if img.width() != 224 && img.height() != 224 {
-            resized = ImageBuffer::from_vec(
-                IMAGE_WIDTH,
-                IMAGE_HEIGHT,
-                image_processor::resizer::resize(buffer, Some(IMAGE_WIDTH), Some(IMAGE_HEIGHT))?,
-            )
-            .unwrap_or_default();
-        }*/
-
-        let resized = image::imageops::resize(&img, 224, 224, ::image::imageops::FilterType::Nearest);
+        let resized = image::imageops::resize(&img, IMAGE_WIDTH, IMAGE_HEIGHT, ::image::imageops::FilterType::Nearest);
 
         let img_array: Tensor =
             tract_ndarray::Array::from_shape_fn((1, 3, 224, 224), |(_, c, y, x)| {
