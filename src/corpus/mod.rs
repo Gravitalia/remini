@@ -3,15 +3,9 @@ use tract_onnx::prelude::*;
 
 const IMAGE_WIDTH: u32 = 224;
 const IMAGE_HEIGHT: u32 = 224;
-const RESULT: [&str; 8] = [
-    "animals",
-    "flower",
-    "human",
-    "landscape",
+const RESULT: [&str; 2] = [
+    "not_nude",
     "nude",
-    "plant",
-    "sport",
-    "vehicle",
 ];
 
 /// Define a structure to manage the Corpus model.
@@ -70,7 +64,7 @@ pub fn init() -> Result<super::Model> {
     let model = tract_onnx::onnx()
         .model_for_path("./src/corpus/model.onnx")?
         .with_input_fact(0, f32::fact([1, 224, 224, 3]).into())?
-        .with_output_fact(0, InferenceFact::dt_shape(f32::datum_type(), tvec![1, 8]))?
+        .with_output_fact(0, InferenceFact::dt_shape(f32::datum_type(), tvec![1, RESULT.len()]))?
         .into_optimized()?
         .into_runnable()?;
 

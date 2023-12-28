@@ -108,7 +108,7 @@ model.compile(optimizer='adam',
 
 model.summary()
 
-epochs = 13
+epochs = 27
 history = model.fit(
   train_ds,
   validation_data=val_ds,
@@ -116,5 +116,5 @@ history = model.fit(
   batch_size=batch_size,
 )
 
-onnx_model = onnxmltools.convert_keras(model, target_opset=2)
+onnx_model = onnxmltools.convert_keras(model, target_opset=18)
 onnxmltools.utils.save_model(onnx_model, 'corpus.onnx')
