@@ -423,7 +423,7 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 [[package]]
 name = "crypto"
 version = "0.1.0"
-source = "git+https://github.com/Gravitalia/Autha.git#3cd37f36bf179d15c13cbd636347f0a9b4992058"
+source = "git+https://github.com/Gravitalia/Autha.git#76bd4a5fe0bfddbb0f89f8c359748cf150fb8e73"
 dependencies = [
  "aes",
  "anyhow",
@@ -966,7 +966,7 @@ dependencies = [
 [[package]]
 name = "image_processor"
 version = "0.1.0"
-source = "git+https://github.com/Gravitalia/Autha.git#3cd37f36bf179d15c13cbd636347f0a9b4992058"
+source = "git+https://github.com/Gravitalia/Autha.git#76bd4a5fe0bfddbb0f89f8c359748cf150fb8e73"
 dependencies = [
  "anyhow",
  "cloudinary",
