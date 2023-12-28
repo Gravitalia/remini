@@ -31,7 +31,18 @@ impl CorpusManager for Corpus {
     fn predict(&self, buffer: &[u8]) -> Result<String> {
         let img = image::load_from_memory(buffer)?;
 
-        let resized = image::imageops::resize(&img, IMAGE_WIDTH, IMAGE_HEIGHT, ::image::imageops::FilterType::Nearest);
+        // If image well-sized use it as it is, otherwise, resize it.
+        let resized = if img.width() == 224 && img.height() == 224 {
+            img.to_rgba8()
+        } else {
+            /*image::load_from_memory(image_processor::resizer::resize(
+                buffer,
+                Some(IMAGE_WIDTH),
+                Some(IMAGE_WIDTH),
+            )?)?
+            .to_rgba8();*/
+            image::imageops::resize(&img, IMAGE_WIDTH, IMAGE_HEIGHT, ::image::imageops::FilterType::Nearest)
+        };
 
         let img_array: Tensor =
             tract_ndarray::Array::from_shape_fn((1, 3, 224, 224), |(_, c, y, x)| {
