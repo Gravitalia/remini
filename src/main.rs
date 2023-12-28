@@ -21,7 +21,7 @@ pub mod remini {
 }
 
 struct Remini {
-    /// Corpus model to detect nodity on a content.
+    /// Corpus model to detect nudity on a content.
     corpus: corpus::Corpus,
 }
 
