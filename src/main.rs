@@ -1,6 +1,7 @@
 pub mod corpus;
 pub mod helpers;
 
+use anyhow::Result;
 use corpus::CorpusManager;
 use remini::remini_server::{Remini as Rem, ReminiServer};
 use remini::{Reply as ReminiReply, Request as ReminiRequest};
@@ -40,7 +41,7 @@ impl Rem for Remini {
                     error: false,
                 })),
                 Err(error) => {
-                    log::error!("Corpus model got an error; {}", error);
+                    log::error!("Corpus model got an error: {}", error);
 
                     Ok(Response::new(ReminiReply {
                         model: content.model,
@@ -59,7 +60,7 @@ impl Rem for Remini {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<()> {
     // Set logger with Fern.
     fern::Dispatch::new()
         .format(|out, message, record| {
@@ -81,11 +82,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             log::LevelFilter::Info
         })
         .chain(std::io::stdout())
-        .apply()
-        .unwrap();
+        .apply()?;
 
     let addr = format!(
-        "[::1]:{}",
+        "0.0.0.0:{}",
         std::env::var("port").unwrap_or("50051".to_string())
     )
     .parse()?;
