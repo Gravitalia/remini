@@ -3,9 +3,6 @@ updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     reviewers:
       - "realhinome"
-    labels:
-      - "dependencies"
-      - "rust"
