@@ -12,7 +12,8 @@ For Plato, **reminiscence** is knowledge that the soul has but which has been fo
 ## Models
 | Name | Description | With |
 | ---- | ----------- | ---- |
-| **corpus** |  Detects images showing nudity. | TF ONNX |
+| [**corpus**](/src/corpus) |  Detects images showing nudity. | TF ONNX |
+| [**superego**](/src/superego) | Detects written misbehavior (insults...). | TF ONNX |
 
 ## License
 [Mozilla Public License](https://github.com/Gravitalia/Autha/blob/master/LICENSE)
