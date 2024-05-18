@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.gravitalia.remini.remini";
+option java_outer_classname = "ReminiProto";
+
+package remini;
+
+// Remini service definition used to perform requests.
+service Remini {
+    // Predicts whether image contains nudity or not.
+    rpc Nudity (NudityRequest) returns (NudityReply) {}
+}
+
+// NudityRequest represents a perdiction query.
+message NudityRequest {
+    // The image to be analyzed, represented as bytes.
+    bytes image = 1;
+}
+
+// NudityReply represents model prediction result with its confidence.
+message NudityReply {
+    // Nudity represents prediction result.
+    enum Nudity {
+        UNSPECIFIED = 0;
+        NO_NUDITY = 1;
+        NUDITY = 2;
+    }
+
+    Nudity result = 1;
+    float confidence = 2;
+}
