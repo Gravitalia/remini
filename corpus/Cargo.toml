@@ -1,0 +1,13 @@
+[package]
+name = "corpus"
+version = "0.1.0"
+description = "corpus detects whether image is a nude or not."
+readme = "README.md"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tract-onnx = { workspace = true }
+tracing = { workspace = true }
+remini-error = { path = "../remini-error" }
+image = { version = "0.25", default-features = false, features = ["rayon", "jpeg", "png", "webp"] }
