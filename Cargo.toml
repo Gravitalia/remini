@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = [
+    "corpus",
+    "remini",
+    "remini-error"
+]
+
+[workspace.package]
+version = "1.0.0"
+description = "machine learning algorithms"
+readme = "README.md"
+edition = "2021"
+license = "MPL"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+debug = false
+
+[profile.dev]
+opt-level = "z"
+debug = true
+
+[workspace.dependencies]
+tract-onnx = "0.21.5"
+tracing = "0.1"
