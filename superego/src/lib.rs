@@ -8,6 +8,7 @@
 
 use remini_error::{Error, ErrorType};
 use std::path::PathBuf;
+use tokenizers::tokenizer::Tokenizer;
 use tract_onnx::prelude::*;
 
 type Model = tract_onnx::prelude::SimplePlan<
@@ -34,35 +35,32 @@ const RESULT: [&str; 7] = [
 pub struct Superego {
     /// `Superego` ONNX model.
     model: Model,
+    /// BERT tokenizer.
+    tokenizer: Tokenizer,
 }
 
 impl Superego {
     /// Loads the ONNX model from a file path.
-    pub fn load(path: PathBuf) -> TractResult<Self> {
-        let model = init(path)?;
-        Ok(Superego { model })
+    pub fn load(model: PathBuf, tokenizer: PathBuf) -> TractResult<Self> {
+        let model = init_model(model)?;
+        let tokenizer = init_tokenizer(tokenizer)?;
+
+        Ok(Superego { model, tokenizer })
     }
 
     /// Predicts the possible label of the input image.
     pub fn predict(
         &self,
-        _text: String,
+        text: String,
     ) -> Result<(f32, f32, f32, f32, f32, f32, f32), Error> {
-        let output_tokenizer = [
-            108, 29, 112, 23, 2, 84, 5, 166, 4, 11, 5, 182, 742, 13, 44, 4106,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        ]
-        .to_vec();
+        let tokenizer = self.tokenizer.encode(text, true).map_err(|_| {
+            Error::new(
+                ErrorType::Unspecified,
+                None,
+                Some("text tokenization with BERT".to_string()),
+            )
+        })?;
+        let output_tokenizer = tokenizer.get_ids();
 
         let input_tensor: Tensor = tract_ndarray::Array2::from_shape_vec(
             (1, output_tokenizer.len()),
@@ -101,8 +99,8 @@ impl Superego {
     }
 }
 
-/// Inits ONNX `Corpus` model.
-fn init(path: PathBuf) -> TractResult<Model> {
+/// Inits ONNX `Superego` model.
+fn init_model(path: PathBuf) -> TractResult<Model> {
     let model = tract_onnx::onnx()
         .model_for_path(path)?
         .with_output_fact(
@@ -113,4 +111,17 @@ fn init(path: PathBuf) -> TractResult<Model> {
         .into_runnable()?;
 
     Ok(model)
+}
+
+/// Inits tokenizer.
+fn init_tokenizer(path: PathBuf) -> Result<Tokenizer, Error> {
+    let tokenizer = Tokenizer::from_file(path).map_err(|error| {
+        Error::new(
+            ErrorType::Unspecified,
+            Some(error),
+            Some("reading tokenizer.json".to_string()),
+        )
+    })?;
+
+    Ok(tokenizer)
 }
