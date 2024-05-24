@@ -9,13 +9,21 @@ package remini;
 // Remini service definition used to perform requests.
 service Remini {
     // Predicts whether image contains nudity or not.
-    rpc Nudity (NudityRequest) returns (NudityReply) {}
+    rpc Nudity (BytesRequest) returns (NudityReply) {}
+    /// Predicts the probability of a text being toxic, neutral, obscene, etc.
+    rpc Toxicity (StringRequest) returns (ToxicityReply) {}
 }
 
-// NudityRequest represents a perdiction query.
-message NudityRequest {
-    // The image to be analyzed, represented as bytes.
-    bytes image = 1;
+// BytesRequest represents a query with only bytes on it.
+message BytesRequest {
+    // Data in bytes, used to perform image verfication.
+    bytes bytes = 1;
+}
+
+// StringRequest represents a query with only string on it.
+message StringRequest {
+    // Data as string, used to perform text analyzing.
+    string string = 1;
 }
 
 // NudityReply represents model prediction result with its confidence.
@@ -29,4 +37,18 @@ message NudityReply {
 
     Nudity result = 1;
     float confidence = 2;
+}
+
+// ToxicityReply represents model prediction about toxicity in a text.
+// Multiple toxicities can be found on a single text.
+message ToxicityReply {
+    float identity_hate = 1;
+    float insult = 2;
+    // If the prediction of neutrality is highest,
+    // this means that the text does not normally contain any toxicities.
+    float neutral = 3;
+    float obscene = 4;
+    float severe_toxic = 5;
+    float threat = 6;
+    float toxic = 7;
 }
