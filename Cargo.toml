@@ -4,7 +4,8 @@ members = [
     "corpus",
     "csv-to-txt",
     "remini",
-    "remini-error"
+    "remini-error",
+    "superego",
 ]
 
 [workspace.package]
