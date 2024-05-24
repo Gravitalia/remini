@@ -10,6 +10,7 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 remini-error = { path = "../remini-error" }
 corpus = { path = "../corpus" }
+superego = { path = "../superego" }
 
 tracing = { workspace = true }
 tracing-subscriber = "0.3"
