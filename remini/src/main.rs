@@ -3,7 +3,7 @@
 //! remini grpc server.
 
 use remini::remini_server::{Remini as Rem, ReminiServer};
-use remini::{NudityReply, NudityRequest};
+use remini::{BytesRequest, NudityReply, StringRequest, ToxicityReply};
 use std::path::Path;
 use tonic::{
     codec::CompressionEncoding, transport::Server, Request, Response, Status,
@@ -18,17 +18,19 @@ pub mod remini {
 struct Remini {
     /// [`corpus::Corpus`] model structure.
     corpus: corpus::Corpus,
+    // [`superego::Superego`] model structure.
+    superego: superego::Superego,
 }
 
 #[tonic::async_trait]
 impl Rem for Remini {
     async fn nudity(
         &self,
-        request: Request<NudityRequest>,
+        request: Request<BytesRequest>,
     ) -> Result<Response<NudityReply>, Status> {
         let (confidence, is_nude) = self
             .corpus
-            .predict(&request.into_inner().image)
+            .predict(&request.into_inner().bytes)
             .map_err(|error| {
                 error!("Failed to predicts image nudity: {:?}", error);
                 Status::invalid_argument("prediction failed")
@@ -37,6 +39,23 @@ impl Rem for Remini {
         Ok(Response::new(NudityReply {
             result: is_nude.into(),
             confidence,
+        }))
+    }
+
+    async fn toxicity(
+        &self,
+        request: Request<StringRequest>,
+    ) -> Result<Response<ToxicityReply>, Status> {
+        println!("{:?}", self.superego.predict(request.into_inner().string));
+
+        Ok(Response::new(ToxicityReply {
+            identity_hate: 0.0,
+            insult: 0.0,
+            neutral: 1.0,
+            obscene: 0.0,
+            severe_toxic: 0.0,
+            threat: 0.0,
+            toxic: 0.0,
         }))
     }
 }
@@ -69,6 +88,10 @@ async fn main() -> remini_error::Result<()> {
     let remini = Remini {
         corpus: corpus::Corpus::load(
             Path::new("./corpus/model.onnx").to_path_buf(),
+        )?,
+        superego: superego::Superego::load(
+            Path::new("./superego/model.onnx").to_path_buf(),
+            Path::new("./superego/tokenizer.json").to_path_buf(),
         )?,
     };
 
