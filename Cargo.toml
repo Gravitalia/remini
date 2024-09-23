@@ -28,5 +28,5 @@ opt-level = "z"
 debug = true
 
 [workspace.dependencies]
-tract-onnx = "0.21.6"
+tract-onnx = "0.21.7"
 tracing = "0.1"
