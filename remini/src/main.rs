@@ -15,6 +15,8 @@ pub mod remini {
     tonic::include_proto!("remini");
 }
 
+const NUDE_THRESHOLD: f32 = 0.75;
+
 struct Remini {
     /// [`corpus::Corpus`] model structure.
     corpus: corpus::Corpus,
@@ -28,7 +30,7 @@ impl Rem for Remini {
         &self,
         request: Request<BytesRequest>,
     ) -> Result<Response<NudityReply>, Status> {
-        let (confidence, is_nude) = self
+        let confidence = self
             .corpus
             .predict(&request.into_inner().bytes)
             .map_err(|error| {
@@ -36,8 +38,10 @@ impl Rem for Remini {
                 Status::invalid_argument("prediction failed")
             })?;
 
+        let is_nude = if confidence >= NUDE_THRESHOLD { 2 } else { 1 };
+
         Ok(Response::new(NudityReply {
-            result: is_nude.into(),
+            result: is_nude,
             confidence,
         }))
     }
@@ -61,7 +65,7 @@ impl Rem for Remini {
 }
 
 #[tokio::main]
-async fn main() -> remini_error::Result<()> {
+async fn main() -> anyhow::Result<()> {
     #[cfg(not(debug_assertions))]
     fmt()
         .with_file(true)
@@ -100,7 +104,7 @@ async fn main() -> remini_error::Result<()> {
             ReminiServer::new(remini)
                 .accept_compressed(CompressionEncoding::Zstd)
                 .max_decoding_message_size(1024 * 1024) // 1MB file maximum.
-                .max_encoding_message_size(1 * 1024), // Only send 1kB.
+                .max_encoding_message_size(1024), // Only send 1kB.
         )
         .serve(addr)
         .await?;

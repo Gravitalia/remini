@@ -6,7 +6,7 @@
 //! identity hate, insult, neutral (nothing), obscene, serious toxicity,
 //! threat and toxicity.
 
-use remini_error::{Error, ErrorType};
+use remini_error::{Error, Result};
 use std::path::PathBuf;
 use tokenizers::tokenizer::Tokenizer;
 use tract_onnx::prelude::*;
@@ -52,42 +52,22 @@ impl Superego {
     pub fn predict(
         &self,
         text: String,
-    ) -> Result<(f32, f32, f32, f32, f32, f32, f32), Error> {
-        let tokenizer = self.tokenizer.encode(text, true).map_err(|_| {
-            Error::new(
-                ErrorType::Unspecified,
-                None,
-                Some("text tokenization with BERT".to_string()),
-            )
-        })?;
+    ) -> Result<(f32, f32, f32, f32, f32, f32, f32)> {
+        let tokenizer = self
+            .tokenizer
+            .encode(text, true)
+            .map_err(|_| Error::Unspecified)?;
         let output_tokenizer = tokenizer.get_ids();
 
         let input_tensor: Tensor = tract_ndarray::Array2::from_shape_vec(
             (1, output_tokenizer.len()),
             output_tokenizer.iter().map(|&x| x as f32).collect(),
         )
-        .map_err(|error| {
-            Error::new(ErrorType::Unspecified, Some(Box::new(error)), None)
-        })?
+        .map_err(|_| Error::Unspecified)?
         .into();
 
-        let outputs: Vec<f32> = self
-            .model
-            .run(tvec!(input_tensor.into()))
-            .map_err(|error| {
-                Error::new(ErrorType::Algorithms, Some(error.into()), None)
-            })?[0]
-            .to_array_view::<f32>()
-            .map_err(|error| {
-                Error::new(
-                    ErrorType::Algorithms,
-                    Some(error.into()),
-                    Some(
-                        "while transforming data into `ndarray::Array`"
-                            .to_string(),
-                    ),
-                )
-            })?
+        let outputs: Vec<f32> = self.model.run(tvec!(input_tensor.into()))?[0]
+            .to_array_view::<f32>()?
             .iter()
             .copied()
             .collect();
@@ -114,14 +94,9 @@ fn init_model(path: PathBuf) -> TractResult<Model> {
 }
 
 /// Inits tokenizer.
-fn init_tokenizer(path: PathBuf) -> Result<Tokenizer, Error> {
-    let tokenizer = Tokenizer::from_file(path).map_err(|error| {
-        Error::new(
-            ErrorType::Unspecified,
-            Some(error),
-            Some("reading tokenizer.json".to_string()),
-        )
-    })?;
+fn init_tokenizer(path: PathBuf) -> Result<Tokenizer> {
+    let tokenizer =
+        Tokenizer::from_file(path).map_err(|_| Error::Unspecified)?;
 
     Ok(tokenizer)
 }
