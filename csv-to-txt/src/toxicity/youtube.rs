@@ -1,11 +1,17 @@
 //! https://www.kaggle.com/datasets/reihanenamdari/youtube-toxicity-data
 
+use remini_error::{Error, Result};
 use serde::{Deserialize, Deserializer};
-use std::{fs, io::Write, path::PathBuf};
 use tracing::info;
 
+use std::fs;
+use std::io::Write;
+use std::path::PathBuf;
+
+use crate::toxicity::Categorties;
+
 /// Converts a string to a boolean.
-fn str_to_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
+fn str_to_bool<'de, D>(deserializer: D) -> std::result::Result<bool, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -53,13 +59,13 @@ pub struct Comment {
     pub radicalism: bool,
 }
 
-pub fn read_csv(path: PathBuf) -> remini_error::Result<Vec<Comment>> {
+pub fn read_csv(path: PathBuf) -> Result<Vec<Comment>> {
     let data: Vec<u8> = fs::read(path)?;
     let mut rdr = csv::Reader::from_reader(&data[0..]);
 
     let mut comments = vec![];
     for result in rdr.deserialize() {
-        let record: Comment = result?;
+        let record: Comment = result.map_err(|_| Error::Unspecified)?;
         comments.push(record);
     }
 
@@ -69,7 +75,7 @@ pub fn read_csv(path: PathBuf) -> remini_error::Result<Vec<Comment>> {
 pub fn comments_to_txt(comments: Vec<Comment>) -> remini_error::Result<()> {
     info!("Put {} entries on their good directory!", comments.len());
 
-    let categories: Vec<(&str, Box<dyn Fn(&Comment) -> bool>)> = vec![
+    let categories: Categorties<Comment> = vec![
         (
             "toxic",
             Box::new(|c: &Comment| {
@@ -110,7 +116,7 @@ pub fn comments_to_txt(comments: Vec<Comment>) -> remini_error::Result<()> {
     ];
 
     for (category, condition) in categories {
-        let _ = fs::create_dir_all(format!("./toxicity/{}", category));
+        let _ = fs::create_dir_all(format!("./toxicity/{category}"));
 
         let classified_comments: Vec<&Comment> =
             comments.iter().filter(|c| condition(c)).collect();

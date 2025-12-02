@@ -9,10 +9,10 @@ members = [
 ]
 
 [workspace.package]
-version = "1.0.0"
-description = "machine learning algorithms"
+version = "1.0.1"
+description = "machine learning algorithms for embedded systems."
 readme = "README.md"
-edition = "2021"
+edition = "2024"
 license = "MPL"
 
 [profile.release]
@@ -28,5 +28,6 @@ opt-level = "z"
 debug = true
 
 [workspace.dependencies]
-tract-onnx = "0.21.7"
+tract-onnx = "0.22.0"
 tracing = "0.1"
+image = { version = "0.25", default-features = false }
