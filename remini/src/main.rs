@@ -4,12 +4,13 @@
 
 use remini::remini_server::{Remini as Rem, ReminiServer};
 use remini::{BytesRequest, NudityReply, StringRequest, ToxicityReply};
-use std::path::Path;
-use tonic::{
-    codec::CompressionEncoding, transport::Server, Request, Response, Status,
-};
-use tracing::{error, Level};
+use tonic::codec::CompressionEncoding;
+use tonic::transport::Server;
+use tonic::{Request, Response, Status};
+use tracing::Level;
 use tracing_subscriber::fmt;
+
+use std::path::Path;
 
 pub mod remini {
     tonic::include_proto!("remini");
@@ -33,8 +34,8 @@ impl Rem for Remini {
         let confidence = self
             .corpus
             .predict(&request.into_inner().bytes)
-            .map_err(|error| {
-                error!("Failed to predicts image nudity: {:?}", error);
+            .map_err(|err| {
+                tracing::error!(%err, "failed to predict image nudity");
                 Status::invalid_argument("prediction failed")
             })?;
 
@@ -79,7 +80,7 @@ async fn main() -> anyhow::Result<()> {
         .with_file(true)
         .with_line_number(true)
         .with_thread_ids(true)
-        .with_max_level(Level::TRACE)
+        .with_max_level(Level::DEBUG)
         .init();
 
     let addr = format!(
@@ -91,7 +92,7 @@ async fn main() -> anyhow::Result<()> {
     // Init every models.
     let remini = Remini {
         corpus: corpus::Corpus::load(
-            Path::new("./corpus/model.onnx").to_path_buf(),
+            Path::new("./corpus/models/model-large.onnx").to_path_buf(),
         )?,
         superego: superego::Superego::load(
             Path::new("./superego/model.onnx").to_path_buf(),
