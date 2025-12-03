@@ -48,9 +48,8 @@ impl Corpus {
 
     /// Loads the ONNX model from a file path.
     pub fn load(path: impl AsRef<Path> + Debug) -> TractResult<Self> {
-        tracing::trace!(?path, "corpus model is loading...");
         let model = Self::init(&path)?;
-        tracing::trace!(?path, "corpus model loaded");
+        tracing::debug!(?path, "corpus model loaded");
         Ok(Corpus(model))
     }
 
@@ -61,7 +60,7 @@ impl Corpus {
     fn resize(
         img: &image::DynamicImage,
     ) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
-        tracing::trace!(
+        tracing::debug!(
             width = img.width(),
             height = img.height(),
             "image resizing"
@@ -82,6 +81,7 @@ impl Corpus {
     pub fn predict(&self, buffer: impl AsRef<[u8]>) -> Result<f32> {
         let img = image::load_from_memory(buffer.as_ref())?;
         let resized = Self::resize(&img);
+        tracing::debug!("image resized");
 
         let img_array: Tensor =
             tract_ndarray::Array::from_shape_fn(NCHW, |(_, c, y, x)| {

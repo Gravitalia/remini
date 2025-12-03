@@ -16,3 +16,6 @@ tract-onnx = { workspace = true }
 tracing = { workspace = true }
 remini-error = { path = "../remini-error" }
 image = { workspace = true, features = ["rayon", "jpeg", "png", "webp"] }
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
