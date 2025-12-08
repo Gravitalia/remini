@@ -8,5 +8,5 @@ license.workspace = true
 
 [dependencies]
 tract-onnx = { workspace = true }
-tokenizers = "0.21"
+tokenizers = "0.22"
 remini-error = { path = "../remini-error" }
